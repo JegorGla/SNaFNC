@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ad3dc5660bd295b4cb3b941ea84efade
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - controller: {instanceID: 0}
+  - GroundCheck: {instanceID: 0}
+  - sound: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
