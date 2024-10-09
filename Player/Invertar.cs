@@ -22,4 +22,17 @@ public class Invertar : MonoBehaviour
 
         Debug.Log("Инвентарь полон!"); // Сообщение, если инвентарь полон
     }
+
+    public int GetItemIndex(Sprite itemSprite)
+    {
+        for (int i = 0; i < takeditem.Length; i++)
+        {
+            if (takeditem[i].sprite == itemSprite)
+            {
+                return i; // Возвращаем индекс, если предмет найден
+            }
+        }
+        return -1; // Возвращаем -1, если предмет не найден
+    }
+
 }

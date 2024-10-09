@@ -7,8 +7,8 @@ public class BackPack : MonoBehaviour
 {
     public GameObject Button;
     public GameObject[] objectForPokaza; // Массив объектов для показа
-    public GameObject VinoObject;
-    public GameObject VinoImage; // Объект для изображения вина
+    //public GameObject VinoObject;
+    //public GameObject VinoImage; // Объект для изображения вина
 
     public GameObject StopTime;
 
@@ -19,7 +19,7 @@ public class BackPack : MonoBehaviour
     {
         StopTime.SetActive(false);
         Button.SetActive(false);
-        VinoImage.gameObject.SetActive(false); // Скрываем изображение вина
+        //VinoImage.gameObject.SetActive(false); // Скрываем изображение вина
 
         Zasterhka = GetComponent<AudioSource>();
     }
@@ -39,10 +39,10 @@ public class BackPack : MonoBehaviour
             StopTime.SetActive(true);
 
             // Если объект Vino был уничтожен (VinoObject = null), показываем изображение
-            if (VinoObject == null)
-            {
-                VinoImage.SetActive(true);
-            }
+            //if (VinoObject == null)
+            //{
+            //    VinoImage.SetActive(true);
+            //}
 
             // Показываем курсор
             Cursor.visible = true;

@@ -4,15 +4,7 @@ using UnityEngine.UI;
 public class Take : MonoBehaviour
 {
     public float distance = 3f; // Дистанция, на которой игрок может взаимодействовать с объектом
-    public Image[] ImageForTake; // Массив изображений для отображения при подборе предмета
-    public Sprite[] sprites; // Массив спрайтов для инвентаря
     public Invertar invertar; // Ссылка на скрипт инвентаря
-
-    private void Start()
-    {
-        // Деактивируем все изображения в массиве ImageForTake
-        DeactivateImages();
-    }
 
     public void Update()
     {
@@ -23,64 +15,31 @@ public class Take : MonoBehaviour
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-            // Проверяем, попал ли луч в объект с тегами "Vino" или "Butt"
+            // Проверяем, попал ли луч в объект
             if (Physics.Raycast(ray, out hit, distance))
             {
                 if (hit.transform.CompareTag("Vino"))
                 {
-                    TakeVino();
+                    // Получаем объект
+                    GameObject vino = hit.transform.gameObject;
+                    // Получаем спрайт из компонента SpriteRenderer
+                    Sprite vinoSprite = vino.GetComponent<SpriteRenderer>().sprite;
+                    vino.SetActive(false); // Деактивируем объект сразу после сбора
+
+                    // Добавляем в инвентарь
+                    invertar.AddItemToInventory(vinoSprite); // Добавляем спрайт в инвентарь
                 }
-                else if (hit.transform.CompareTag("Button"))
+
+                if (hit.transform.CompareTag("Button"))
                 {
-                    TakeButt();
-                }
-            }
-        }
-    }
+                    // Получаем объект
+                    GameObject cleaner = hit.transform.gameObject;
+                    // Получаем спрайт из компонента SpriteRenderer
+                    Sprite cleanerSprite = cleaner.GetComponent<SpriteRenderer>().sprite;
+                    cleaner.SetActive(false); // Деактивируем объект сразу после сбора
 
-    private void TakeVino()
-    {
-        ActivateImages();
-        if (invertar != null && sprites.Length > 0)
-        {
-            invertar.AddItemToInventory(sprites[0]); // Добавляем первый спрайт из массива
-        }
-    }
-
-    private void TakeButt()
-    {
-        ActivateImages();
-        if (invertar != null && sprites.Length > 1)
-        {
-            invertar.AddItemToInventory(sprites[1]); // Добавляем второй спрайт из массива
-        }
-    }
-
-    private void ActivateImages()
-    {
-        // Активируем все изображения в массиве ImageForTake
-        if (ImageForTake != null)
-        {
-            foreach (var image in ImageForTake)
-            {
-                if (image != null)
-                {
-                    image.gameObject.SetActive(true);
-                }
-            }
-        }
-    }
-
-    private void DeactivateImages()
-    {
-        // Деактивируем все изображения в массиве ImageForTake
-        if (ImageForTake != null)
-        {
-            foreach (var image in ImageForTake)
-            {
-                if (image != null)
-                {
-                    image.gameObject.SetActive(false);
+                    // Добавляем в инвентарь
+                    invertar.AddItemToInventory(cleanerSprite); // Добавляем спрайт в инвентарь
                 }
             }
         }
