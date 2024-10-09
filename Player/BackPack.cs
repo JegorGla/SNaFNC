@@ -6,46 +6,80 @@ using UnityEngine.UI;
 public class BackPack : MonoBehaviour
 {
     public GameObject Button;
-    public GameObject Vino;
+    public GameObject[] objectForPokaza; // Массив объектов для показа
     public GameObject VinoObject;
-    public Image VinoImage; // Добавьте Image компонент для отображения спрайта
+    public GameObject VinoImage; // Объект для изображения вина
+
+    public GameObject StopTime;
+
+    public AudioSource Zasterhka; // Аудиоисточник
+    public GameObject PolishCow;
 
     private void Start()
     {
+        StopTime.SetActive(false);
         Button.SetActive(false);
-        Vino.SetActive(false);
-        VinoImage.gameObject.SetActive(false); // Скрыть изображение
+        VinoImage.gameObject.SetActive(false); // Скрываем изображение вина
+
+        Zasterhka = GetComponent<AudioSource>();
     }
 
-    private void Update()
+    public void Update()
     {
+        // Если нажата клавиша Space
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            Button.SetActive(true);
-            if (VinoObject == null) // Check if Vino has been destroyed
+            // Показываем все объекты из массива
+            foreach (GameObject obj in objectForPokaza)
             {
-                Vino.SetActive(true);
+                obj.SetActive(true);
             }
+
+            Button.SetActive(true);
+            StopTime.SetActive(true);
+
+            // Если объект Vino был уничтожен (VinoObject = null), показываем изображение
+            if (VinoObject == null)
+            {
+                VinoImage.SetActive(true);
+            }
+
+            // Показываем курсор
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.Confined;
+
+            // Воспроизводим звук застежки
+            Zasterhka.Play();
         }
+        // Если клавиша Space отпущена
         else if (Input.GetKeyUp(KeyCode.Space))
         {
+            PolishCow.SetActive(false);
+            foreach (GameObject obj in objectForPokaza)
+            {
+                obj.SetActive(false);
+            }
+
+            StopTime.SetActive(false);
             Button.SetActive(false);
-            Vino.SetActive(false);
+
+            // Скрываем курсор
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
+
+            // Воспроизводим звук застежки
+            Zasterhka.Play();
         }
     }
 
-    public void AddItemToBackPack(Sprite itemSprite)
+    public void SeePomocnika()
     {
-        VinoImage.sprite = itemSprite;
-        VinoImage.gameObject.SetActive(true);
+        
+        PolishCow.SetActive(true);
     }
-
-    public void ActivateVino()
-    {
-        Vino.SetActive(false);
-    }
+    // Метод для активации вина
+    //public void ActivateVino()
+    //{
+    //    VinoImage.SetActive(false); // Скрываем изображение вина
+    //}
 }

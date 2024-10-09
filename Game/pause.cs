@@ -16,6 +16,10 @@ public class Pause : MonoBehaviour
         {
             TogglePause();
         }
+        else if (Input.GetKeyDown(KeyCode.R))
+        {
+            TogglePause();
+        }
     }
 
     private void TogglePause()

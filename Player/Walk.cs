@@ -3,13 +3,10 @@ using UnityEngine;
 public class Walk : MonoBehaviour
 {
     public CharacterController controller;
-    public float speed = 12f;
-    public float runSpeed = 22f;
-    public float crouchSpeed = 5f;
+    public float walkSpeed = 4f; // Скорость при ходьбе
+    public float runSpeed = 8f;  // Скорость при беге
+    public float crouchSpeed = 2f; // Скорость при приседании
     public float gravity = -19.81f;
-    public Transform GroundCheck;
-    public float GroundDistance = 0.4f;
-    public LayerMask GroundMask;
     public float stamina = 5f;
     public float staminaDrainRate = 1f;
     public float staminaRecoveryTime = 15f;
@@ -17,19 +14,19 @@ public class Walk : MonoBehaviour
 
     public AudioSource stepAudioSource;
     public AudioClip walkClip;
-    public Animator cameraAnimator; // Animator component for the camera
+    public AudioClip runClip; // Добавим звук для бега
+    public AudioClip crouchClip; // Добавим звук для приседания
 
     private float staminaRegenRate;
     private Vector3 velocity;
-    private bool isGround;
     private float currentStamina;
     private bool isExhausted = false;
     private bool isCrouching = false;
     private float originalHeight;
-    private float stepInterval = 0.5f; // Interval between steps
+    private float stepInterval = 0.5f; // Интервал между шагами
     private float stepTimer;
 
-    public GameObject CameraRightWall;
+    public GameObject[] cameras; // Массив камер для проверки их состояния
 
     private float maxLookAngle = 90f;
 
@@ -40,10 +37,6 @@ public class Walk : MonoBehaviour
 
     private void Start()
     {
-        if (CameraRightWall != null)
-        {
-            CameraRightWall.SetActive(false);
-        }
         currentStamina = stamina;
         staminaRegenRate = stamina / staminaRecoveryTime;
         originalHeight = controller.height;
@@ -53,77 +46,84 @@ public class Walk : MonoBehaviour
 
     void Update()
     {
-        isGround = Physics.CheckSphere(GroundCheck.position, GroundDistance, GroundMask);
-
-        if (isGround && velocity.y < 0)
+        // Проверяем, активна ли какая-либо из камер
+        bool anyCameraActive = false;
+        foreach (GameObject camera in cameras)
         {
-            velocity.y = -2f;
+            if (camera.activeSelf)
+            {
+                anyCameraActive = true;
+                break;
+            }
         }
 
+        if (anyCameraActive)
+        {
+            return;
+        }
+
+        // Получаем ввод пользователя для передвижения
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
-
         Vector3 move = transform.right * x + transform.forward * z;
 
-        if (CameraRightWall.activeSelf)
+        HandleCrouch();
+
+        bool isRunning = Input.GetKey(KeyCode.LeftShift) && !isExhausted && !isCrouching;
+
+        if (isRunning && currentStamina > 0)
         {
-            move = Vector3.zero;
+            float moveSpeed = runSpeed;
+            currentStamina -= staminaDrainRate * Time.deltaTime;
+            currentStamina = Mathf.Clamp(currentStamina, 0, stamina);
+
+            if (currentStamina <= 0)
+            {
+                isExhausted = true;
+            }
+
+            controller.Move(move * moveSpeed * Time.deltaTime);
+            PlayFootstepSound(runClip);
         }
         else
         {
-            HandleCrouch();
-
-            bool isRunning = Input.GetKey(KeyCode.LeftShift) && !isExhausted && !isCrouching;
-
-            if (isRunning && currentStamina > 0)
+            if (!isRunning)
             {
-                float moveSpeed = runSpeed;
-                currentStamina -= staminaDrainRate * Time.deltaTime;
+                currentStamina += staminaRegenRate * Time.deltaTime;
                 currentStamina = Mathf.Clamp(currentStamina, 0, stamina);
 
-                if (currentStamina <= 0)
+                if (currentStamina >= stamina)
                 {
-                    isExhausted = true;
+                    isExhausted = false;
                 }
-
-                controller.Move(move * moveSpeed * Time.deltaTime);
             }
-            else
+
+            float moveSpeed = isCrouching ? crouchSpeed : walkSpeed;
+            controller.Move(move * moveSpeed * Time.deltaTime);
+
+            if (isCrouching)
             {
-                if (!isRunning)
-                {
-                    currentStamina += staminaRegenRate * Time.deltaTime;
-                    currentStamina = Mathf.Clamp(currentStamina, 0, stamina);
-
-                    if (currentStamina >= stamina)
-                    {
-                        isExhausted = false;
-                    }
-                }
-
-                float moveSpeed = isCrouching ? crouchSpeed : speed;
-                controller.Move(move * moveSpeed * Time.deltaTime);
-
-                if (!isCrouching && !isRunning)
-                {
-                    PlayFootstepSound(walkClip);
-                }
+                PlayFootstepSound(crouchClip);
+            }
+            else if (!isRunning)
+            {
+                PlayFootstepSound(walkClip);
             }
         }
 
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
-
-        // Camera animation logic
-        if (move.magnitude > 0 && isGround)
+        // Проверяем, стоит ли игрок на земле
+        if (controller.isGrounded)
         {
-            cameraAnimator.SetBool("isWalking", true);
+            velocity.y = -2f;  // Сбрасываем вертикальную скорость, если на земле
         }
         else
         {
-            cameraAnimator.SetBool("isWalking", false);
+            velocity.y += gravity * Time.deltaTime;  // Применяем гравитацию
         }
+
+        controller.Move(velocity * Time.deltaTime);
     }
+
 
     private void HandleCrouch()
     {
@@ -149,29 +149,42 @@ public class Walk : MonoBehaviour
 
     private void PlayFootstepSound(AudioClip clip)
     {
-        if (isGround && (controller.velocity.magnitude > 0.1f))
+        if (controller.velocity.magnitude > 0.1f)
         {
             stepTimer -= Time.deltaTime;
+
+            // Замедляем шаги, если игрок присел
+            float currentStepInterval = isCrouching ? stepInterval * 1.5f : stepInterval;
+                
             if (stepTimer <= 0f)
             {
                 stepAudioSource.clip = clip;
                 stepAudioSource.Play();
-                stepTimer = stepInterval; // Reset timer
+                stepTimer = currentStepInterval; // Сбрасываем таймер
             }
         }
     }
 
     bool IsPlayerLookingAtCamera()
     {
-        if (CameraRightWall == null)
+        if (cameras == null || cameras.Length == 0)
             return false;
 
         Vector3 playerDirection = transform.forward;
-        Vector3 cameraDirection = (CameraRightWall.transform.position - transform.position).normalized;
+        foreach (GameObject camera in cameras)
+        {
+            if (camera == null)
+                continue;
 
-        float angle = Vector3.Angle(playerDirection, cameraDirection);
+            Vector3 cameraDirection = (camera.transform.position - transform.position).normalized;
+            float angle = Vector3.Angle(playerDirection, cameraDirection);
 
-        return angle < maxLookAngle;
+            if (angle < maxLookAngle)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     public bool IsCrouching()

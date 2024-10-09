@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class OpenComputer : MonoBehaviour
@@ -6,7 +7,6 @@ public class OpenComputer : MonoBehaviour
 
     public Animator OpenComp; // Аниматор для открытия компьютера
     public Animator CloseComp; // Аниматор для закрытия компьютера
-    public Animator Player;
 
     private void Start()
     {
@@ -16,21 +16,19 @@ public class OpenComputer : MonoBehaviour
         // Получаем ссылки на аниматоры, прикрепленные к этому объекту
         OpenComp = GetComponent<Animator>();
         CloseComp = GetComponent<Animator>();
-        Player = GetComponent<Animator>();
+
     }
 
     public void openComputer()
     {
         // Запускаем анимацию открытия компьютера
         OpenComp.SetTrigger("Field_screen");
-        Player.SetTrigger("Go");
     }
 
     public void CloseComputer()
     {
         // Запускаем анимацию закрытия компьютера
         CloseComp.SetTrigger("field_out");
-        Player.SetTrigger("Exit");
     }
 
     // Метод, который будет вызван событием анимации при открытии компьютера

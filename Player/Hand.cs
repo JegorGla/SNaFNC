@@ -22,7 +22,7 @@ public class Hand : MonoBehaviour
         if (Physics.Raycast(ray, out hit, Distance))
         {
             // Проверяем, имеет ли объект нужный тег или активна ли CameraRightWall
-            if (hit.transform.CompareTag("Vino") || hit.transform.CompareTag("Button") || hit.transform.CompareTag("Computer") || hit.transform.CompareTag("Old_Phone"))
+            if (hit.transform.CompareTag("Vino") || hit.transform.CompareTag("Button") || hit.transform.CompareTag("Computer") || hit.transform.CompareTag("Old_Phone") || hit.transform.CompareTag("DoorInWood") || hit.transform.CompareTag("Amongus") || hit.transform.CompareTag("Bathroom_toilet_door") || hit.transform.CompareTag("Toilet"))
             {
                 PlayerHand.SetActive(true);
             }

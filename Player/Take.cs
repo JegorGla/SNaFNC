@@ -1,79 +1,88 @@
 using UnityEngine;
-using System.Collections;
+using UnityEngine.UI;
 
 public class Take : MonoBehaviour
 {
-    float distance = 3f;
-    public Transform pos1; // Новая позиция для объекта перед камерой
-    public Transform pos2;
-    public Transform cameraPosition; // Новая позиция для камеры
-    private Rigidbody rb;
+    public float distance = 3f; // Дистанция, на которой игрок может взаимодействовать с объектом
+    public Image[] ImageForTake; // Массив изображений для отображения при подборе предмета
+    public Sprite[] sprites; // Массив спрайтов для инвентаря
+    public Invertar invertar; // Ссылка на скрипт инвентаря
 
-    public GameObject Vino;
-    public BackPack backPack;
-
-    public void Start()
+    private void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        backPack = Object.FindAnyObjectByType<BackPack>();
+        // Деактивируем все изображения в массиве ImageForTake
+        DeactivateImages();
     }
 
-    void OnMouseDown()
+    public void Update()
     {
-        RaycastHit hit;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit, distance))
+        // Проверяем, нажата ли левая кнопка мыши
+        if (Input.GetMouseButtonDown(0))
         {
-            if (hit.transform.tag == "Vino")
+            // Создаем луч от камеры в направлении мыши
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            // Проверяем, попал ли луч в объект с тегами "Vino" или "Butt"
+            if (Physics.Raycast(ray, out hit, distance))
             {
-                StartCoroutine(MoveToCameraThenPos2(hit.transform.gameObject));
+                if (hit.transform.CompareTag("Vino"))
+                {
+                    TakeVino();
+                }
+                else if (hit.transform.CompareTag("Button"))
+                {
+                    TakeButt();
+                }
             }
         }
     }
 
-    IEnumerator MoveToCameraThenPos2(GameObject vinoObject)
+    private void TakeVino()
     {
-        rb.isKinematic = true;
-
-        // Двигаем объект к камере
-        float duration = 0.5f;
-        float timer = 0f;
-        Vector3 startPosition = vinoObject.transform.position;
-        Vector3 targetPosition = cameraPosition.position;
-
-        while (timer < duration)
+        ActivateImages();
+        if (invertar != null && sprites.Length > 0)
         {
-            timer += Time.deltaTime;
-            float t = Mathf.Clamp01(timer / duration);
-            vinoObject.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
-            yield return null;
+            invertar.AddItemToInventory(sprites[0]); // Добавляем первый спрайт из массива
         }
+    }
 
-        // Задержка 2 секунды перед опусканием
-        yield return new WaitForSeconds(2);
-
-        // Теперь двигаем объект от камеры к pos2
-        duration = 0.5f;
-        timer = 0f;
-        startPosition = vinoObject.transform.position;
-        targetPosition = pos2.position;
-
-        while (timer < duration)
+    private void TakeButt()
+    {
+        ActivateImages();
+        if (invertar != null && sprites.Length > 1)
         {
-            timer += Time.deltaTime;
-            float t = Mathf.Clamp01(timer / duration);
-            vinoObject.transform.position = Vector3.Lerp(startPosition, targetPosition, t);
-            yield return null;
+            invertar.AddItemToInventory(sprites[1]); // Добавляем второй спрайт из массива
         }
+    }
 
-        rb.isKinematic = false;
-
-        // Удаляем объект и активируем Vino в BackPack только после успешного перемещения
-        PickableItem item = vinoObject.GetComponent<PickableItem>();
-        if (item != null)
+    private void ActivateImages()
+    {
+        // Активируем все изображения в массиве ImageForTake
+        if (ImageForTake != null)
         {
-            backPack.AddItemToBackPack(item.itemSprite);
+            foreach (var image in ImageForTake)
+            {
+                if (image != null)
+                {
+                    image.gameObject.SetActive(true);
+                }
+            }
         }
-        Destroy(vinoObject);
+    }
+
+    private void DeactivateImages()
+    {
+        // Деактивируем все изображения в массиве ImageForTake
+        if (ImageForTake != null)
+        {
+            foreach (var image in ImageForTake)
+            {
+                if (image != null)
+                {
+                    image.gameObject.SetActive(false);
+                }
+            }
+        }
     }
 }

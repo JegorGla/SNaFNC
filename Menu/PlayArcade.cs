@@ -5,7 +5,15 @@ public class PlayArcade : MonoBehaviour
 {
     public GameObject playButton;
     public GameObject panel;
-    private bool isMenu = true;
+
+    //private bool isMenu = true;
+
+    public GameObject CanvasMenu;
+    public GameObject progressBar;
+
+    public GameObject LoaderCanvas;
+
+    public AudioSource mainMusic;
 
     private void Start()
     {
@@ -15,12 +23,9 @@ public class PlayArcade : MonoBehaviour
 
     public void LoadArcadeMode()
     {
-        if (isMenu)
-        {
-            // Загружаємо сцену "ArcadeMode"
-            SceneManager.LoadScene("BeforeGame");
-            // Встановлюємо флаг меню в false
-            isMenu = false;
-        }
+        CanvasMenu.SetActive(false);
+        progressBar.SetActive(true);
+        LoaderCanvas.SetActive(true);
+        mainMusic.Stop();
     }
 }

@@ -1,36 +1,33 @@
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.UI;
 
 public class VolumeSetting : MonoBehaviour
 {
-    public AudioSource audioSource;
+    public AudioMixer audioMixer; // Ссылка на ваш AudioMixer
     public Slider volumeSlider;
-    private float volume = 1f;
 
     void Start()
     {
         // Проверка на существование сохраненного значения громкости в PlayerPrefs
         if (PlayerPrefs.HasKey("VolumeLevel"))
         {
-            volume = PlayerPrefs.GetFloat("VolumeLevel");
+            float volume = PlayerPrefs.GetFloat("VolumeLevel");
+            volumeSlider.value = volume;
+            SetVolume(volume);
         }
         else
         {
-            volume = 1f; // Значение громкости по умолчанию
+            volumeSlider.value = 1f; // Значение громкости по умолчанию
         }
 
-        audioSource = GetComponent<AudioSource>();
-        audioSource.volume = volume;
-
-        // Настройка слайдера
-        volumeSlider.value = volume;
         volumeSlider.onValueChanged.AddListener(SetVolume);
     }
 
-    public void SetVolume(float vol)
+    public void SetVolume(float volume)
     {
-        volume = vol;
-        audioSource.volume = volume;
+        // Убедитесь, что имя параметра совпадает с тем, что в AudioMixer
+        audioMixer.SetFloat("Volume", Mathf.Log10(volume) * 20);
         PlayerPrefs.SetFloat("VolumeLevel", volume);
     }
 }

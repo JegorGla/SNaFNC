@@ -4,7 +4,7 @@ public class GasGasGas : MonoBehaviour
 {
     public AudioClip sound;
     private AudioSource audioSource;
-    private bool isPlaying = false;
+    //private bool isPlaying = false;
     private Walk playerController;
 
     private void Start()
@@ -42,7 +42,7 @@ public class GasGasGas : MonoBehaviour
             if (audioSource.isPlaying)
             {
                 audioSource.Stop();
-                isPlaying = false;
+                //isPlaying = false;
             }
             return;
         }
@@ -52,7 +52,7 @@ public class GasGasGas : MonoBehaviour
             if (!audioSource.isPlaying && sound != null)
             {
                 audioSource.Play();
-                isPlaying = true;
+                //isPlaying = true;
             }
         }
         else if (Input.GetKeyUp(KeyCode.LeftShift))
@@ -60,7 +60,7 @@ public class GasGasGas : MonoBehaviour
             if (audioSource.isPlaying)
             {
                 audioSource.Stop();
-                isPlaying = false;
+                //isPlaying = false;
             }
         }
     }

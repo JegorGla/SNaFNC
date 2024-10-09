@@ -1,40 +1,65 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class OpenCloseLaptop : MonoBehaviour
 {
-    private Animator mAnimator;
-    private bool IsOpenLapTop;
-    public GameObject Nout;
+    public Animator LapTOp; // Аниматор назначен через инспектор
+    public GameObject Nout; // Объект ноутбука назначен через инспектор
 
-    private void Start()
+    private bool IsOpenLapTop;
+
+    void Start()
     {
-        mAnimator = GetComponent<Animator>();
-        Nout = GetComponent<GameObject>();
-        Nout.SetActive(false);
+        if (Nout != null)
+        {
+            SetLaptopVisible(false); // Изначально ноутбук не видим
+        }
     }
 
-    private void Update()
+    void Update()
     {
-        if (mAnimator != null)
+        if (LapTOp != null && Nout != null)
         {
             if (Input.GetKeyDown(KeyCode.Tab))
             {
-
                 if (!IsOpenLapTop)
                 {
-                    Nout.SetActive(true);
-                    mAnimator.SetTrigger("TrOpen");
+                    SetLaptopVisible(true);
+                    LapTOp.SetTrigger("Open");
                     IsOpenLapTop = true;
                 }
                 else
                 {
-                    Nout.SetActive(false);
-                    mAnimator.SetTrigger("TrClose");
+                    LapTOp.SetTrigger("Close");
                     IsOpenLapTop = false;
+                    // Используем корутину для ожидания окончания анимации
+                    StartCoroutine(DeactivateNoutAfterAnimation());
                 }
             }
+        }
+    }
+
+    private IEnumerator DeactivateNoutAfterAnimation()
+    {
+        // Ждем окончания анимации закрытия
+        yield return new WaitForSeconds(LapTOp.GetCurrentAnimatorStateInfo(0).length);
+        SetLaptopVisible(false);
+    }
+
+    private void SetLaptopVisible(bool visible)
+    {
+        // Отключаем/включаем рендеринг всех MeshRenderer'ов внутри ноутбука
+        MeshRenderer[] renderers = Nout.GetComponentsInChildren<MeshRenderer>();
+        foreach (var renderer in renderers)
+        {
+            renderer.enabled = visible;
+        }
+
+        // Если есть Canvas, например для UI-элементов, отключаем их отображение
+        Canvas[] canvases = Nout.GetComponentsInChildren<Canvas>();
+        foreach (var canvas in canvases)
+        {
+            canvas.enabled = visible;
         }
     }
 }
