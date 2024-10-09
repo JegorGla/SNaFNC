@@ -12,9 +12,11 @@ public class TakeVino : MonoBehaviour
     private int Vinofloat = 0; // Текущее количество предметов в инвентаре
     private const int maxVino = 7; // Максимальное количество предметов в инвентаре
 
+    public Take take;
+
     private void Start()
     {
-        DeactivateImage();
+        take.DeactivateAllImages();
     }
 
     public void Update()
@@ -46,7 +48,7 @@ public class TakeVino : MonoBehaviour
                     invertar.AddItemToInventory(sprite); // Добавляем новый предмет в инвентарь
                     Vinofloat++;
                     text.text = Vinofloat.ToString(); // Устанавливаем количество
-                    ActivateImage(); // Активируем изображение для отображения
+                    take.ActivateImage(sprite); // Активируем изображение для отображения
                 }
             }
 
@@ -62,15 +64,5 @@ public class TakeVino : MonoBehaviour
     {
         Vinofloat++; // Увеличиваем количество в инвентаре
         text.text = Vinofloat.ToString(); // Обновляем текст
-    }
-
-    private void ActivateImage()
-    {
-        // Ваш код для активации изображения
-    }
-
-    private void DeactivateImage()
-    {
-        // Ваш код для деактивации изображения
     }
 }
